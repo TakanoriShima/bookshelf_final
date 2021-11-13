@@ -1,4 +1,5 @@
 <?php
+
     function h($str) {
         return htmlspecialchars($str, ENT_QUOTES, 'utf-8');
     }
@@ -64,6 +65,20 @@
         $sql = 'DELETE FROM books WHERE id = ?';
         $statement = mysqli_prepare($database, $sql);
         mysqli_stmt_bind_param($statement, 'i', $_POST['book_id_2']);
+        mysqli_stmt_execute($statement);
+        mysqli_stmt_close($statement);
+    }
+    
+    //bookshelf_edit.phpから送られてくる書籍データの登録
+    if (array_key_exists('submit_edit_book', $_POST)) {
+        // まずは送られてきた画像をuploadsフォルダに移動させる
+        $file_name = $_FILES['edit_book_image']['name'];
+        $image_path = './uploads/' . $file_name;
+        move_uploaded_file($_FILES['edit_book_image']['tmp_name'], $image_path);
+        // データベースに書籍を新規登録する
+        $sql = 'UPDATE books SET title=?, image_url=? WHERE id=?';
+        $statement = mysqli_prepare($database, $sql);
+        mysqli_stmt_bind_param($statement, 'ssi', $_POST['edit_book_title'], $image_path, $_POST['book_id']);
         mysqli_stmt_execute($statement);
         mysqli_stmt_close($statement);
     }
