@@ -150,34 +150,36 @@
                             $image_url = $record['image_url'];
                             $status = $record['status'];
 ?>
-                    <div class="book_item">
-                        <div class="book_image">
-                            <img src="<?php print h($image_url); ?>" alt="">
-                        </div>
-                        <div class="book_detail">
-                            <div class="book_title">
-                                <?php print h($title); ?>
+                    <a href="bookshelf_edit.php?id=<?php print h($id); ?>">
+                        <div class="book_item">
+                            <div class="book_image">
+                                <img src="<?php print h($image_url); ?>" alt="">
                             </div>
-                            <form action="bookshelf_index.php" method="post">
-                                <input type="hidden" name="book_id" value="<?php print h($id); ?>">
-                                <div class="book_status unread <?php if ($status == 'unread') print 'active'; ?>">
-                                    <input type="submit" name="submit_book_unread" value="未読">
+                            <div class="book_detail">
+                                <div class="book_title">
+                                    <?php print h($title); ?>
                                 </div>
-                                <div class="book_status reading <?php if ($status == 'reading') print 'active'; ?>">
-                                    <input type="submit" name="submit_book_reading" value="読中">
-                                </div>
-                                <div class="book_status finished <?php if ($status == 'finished') print 'active'; ?>">
-                                    <input type="submit" name="submit_book_finished" value="読了">
-                                </div>
-                            </form>
-                            <form action="bookshelf_index.php" method="post">
-                                <input type="hidden" name="book_id_2" value="<?php print h($id); ?>">
-                                <div class="book_delete">
-                                    <input type="submit" name="submit_book_delete" value="削除する"><img src="./images/icon_trash.png" alt="icon trash">
-                                </div>
-                            </form>
+                                <form action="bookshelf_index.php" method="post">
+                                    <input type="hidden" name="book_id" value="<?php print h($id); ?>">
+                                    <div class="book_status unread <?php if ($status == 'unread') print 'active'; ?>">
+                                        <input type="submit" name="submit_book_unread" value="未読">
+                                    </div>
+                                    <div class="book_status reading <?php if ($status == 'reading') print 'active'; ?>">
+                                        <input type="submit" name="submit_book_reading" value="読中">
+                                    </div>
+                                    <div class="book_status finished <?php if ($status == 'finished') print 'active'; ?>">
+                                        <input type="submit" name="submit_book_finished" value="読了">
+                                    </div>
+                                </form>
+                                <form action="bookshelf_index.php" method="post">
+                                    <input type="hidden" name="book_id_2" value="<?php print h($id); ?>">
+                                    <div class="book_delete">
+                                        <input type="submit" name="submit_book_delete" value="削除する"><img src="./images/icon_trash.png" alt="icon trash">
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </div>
+                    </a>
 <?php
                 }
                 mysqli_free_result($result);
