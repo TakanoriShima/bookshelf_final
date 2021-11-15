@@ -110,7 +110,7 @@ header nav a {
     text-align: center;
     vertical-align: middle;
 }
-.book_item .book_image img {
+img {
     max-height: 250px;
     max-width: 250px;
     vertical-align: middle;
