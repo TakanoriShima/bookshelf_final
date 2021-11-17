@@ -1,5 +1,6 @@
 <?php
 
+    // var_dump($_GET);
     function h($str) {
         return htmlspecialchars($str, ENT_QUOTES, 'utf-8');
     }
@@ -69,7 +70,7 @@
         mysqli_stmt_close($statement);
     }
     
-    //bookshelf_edit.phpから送られてくる書籍データの登録
+    //bookshelf_edit.phpから送られてくる書籍データの更新
     if (array_key_exists('submit_edit_book', $_POST)) {
         // まずは送られてきた画像をuploadsフォルダに移動させる
         $file_name = $_FILES['edit_book_image']['name'];
@@ -99,22 +100,40 @@
     $record = mysqli_fetch_assoc($result);
     $count_finished = $record['count'];
     
-    // どのボタンを押したか（どのステージで絞り込みをするか）を判断し、SELECT文を変更する
-    if (array_key_exists('submit_only_unread', $_POST)) {
-        $sql = 'SELECT * FROM books WHERE status = "unread" ORDER BY created_at DESC';
-    }
-    elseif (array_key_exists('submit_only_reading', $_POST)) {
-        $sql = 'SELECT * FROM books WHERE status = "reading" ORDER BY created_at DESC';
-    }
-    elseif (array_key_exists('submit_only_finished', $_POST)) {
-        $sql = 'SELECT * FROM books WHERE status = "finished" ORDER BY created_at DESC';
-    }
-    else {
-        $sql = 'SELECT * FROM books ORDER BY created_at DESC';
-    }
-    // いづれかの$sqlを実行して$resultに代入する
-    $result = mysqli_query($database, $sql);
+    // 検索以外のボタンが押されたならば
+    if(!array_key_exists('submit_search', $_GET)){
+        
+        // どのボタンを押したか（どのステージで絞り込みをするか）を判断し、SELECT文を変更する
+        if (array_key_exists('submit_only_unread', $_POST)) {
+            $sql = 'SELECT * FROM books WHERE status = "unread" ORDER BY created_at DESC';
+        }
+        elseif (array_key_exists('submit_only_reading', $_POST)) {
+            $sql = 'SELECT * FROM books WHERE status = "reading" ORDER BY created_at DESC';
+        }
+        elseif (array_key_exists('submit_only_finished', $_POST)) {
+            $sql = 'SELECT * FROM books WHERE status = "finished" ORDER BY created_at DESC';
+        }
+        else {
+            $sql = 'SELECT * FROM books ORDER BY created_at DESC';
+        }
+        // いづれかの$sqlを実行して$resultに代入する
+        $result = mysqli_query($database, $sql);
     
+    }else{
+        // あいまい検索キーワードの組み立て
+        $keyword = '%' . $_GET['keyword'] . '%';
+        // SQL文の組み立て
+    	$sql = "SELECT * FROM books WHERE title LIKE ? ORDER BY created_at DESC";
+    	// SQL文実行の準備
+        $statement = mysqli_prepare($database, $sql);
+        // バインド処理
+        mysqli_stmt_bind_param($statement, 's', $keyword);
+        // 本番実行
+        mysqli_stmt_execute($statement);
+        // 結果の取得
+        $result = mysqli_stmt_get_result($statement);
+
+    }
     // MySQLを使った処理が終わると、接続は不要なので切断する
     mysqli_close($database);
 ?>
@@ -131,7 +150,8 @@
                 <div id="logo">
                     <a href="./bookshelf_index.php"><img src="./images/logo.png" alt="Bookshelf"></a>
                 </div>
-                <nav>
+                <nav style="display: flex">
+                    <form action="./bookshelf_index.php" style="margin-right: 20px;"><input type="search" name="keyword" placeholder="書籍名" style="margin-right: 10px;"><button type="submit" name="submit_search" value="検索">検索</button></form>
                     <a href="./bookshelf_form.php"><img src="./images/icon_plus.png" alt="">書籍登録</a>
                 </nav>
             </div>
