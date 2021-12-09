@@ -25,6 +25,9 @@
                     <div class="book_image">
                         <input type="file" name="add_book_image" required>
                     </div>
+                    <div class="book_title">
+                        <input type="password" name="add_book_password" required>
+                    </div>
                     <div class="book_submit">
                         <input type="submit" name="submit_add_book" value="登録">
                     </div>

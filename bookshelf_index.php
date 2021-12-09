@@ -31,9 +31,9 @@
         $image_path = './uploads/' . $file_name;
         move_uploaded_file($_FILES['add_book_image']['tmp_name'], $image_path);
         // データベースに書籍を新規登録する
-        $sql = 'INSERT INTO books (title, image_url, status) VALUES (?, ?, "unread")';
+        $sql = 'INSERT INTO books (title, image_url, password, status) VALUES (?, ?, ?, "unread")';
         $statement = mysqli_prepare($database, $sql);
-        mysqli_stmt_bind_param($statement, 'ss', $_POST['add_book_title'], $image_path);
+        mysqli_stmt_bind_param($statement, 'sss', $_POST['add_book_title'], $image_path, $_POST['add_book_password']);
         mysqli_stmt_execute($statement);
         mysqli_stmt_close($statement);
     }
@@ -55,6 +55,13 @@
     }
     elseif (array_key_exists('submit_book_finished', $_POST)) {
         $sql = 'UPDATE books SET status = "finished" WHERE id = ?';
+        $statement = mysqli_prepare($database, $sql);
+        mysqli_stmt_bind_param($statement, 'i', $_POST['book_id']);
+        mysqli_stmt_execute($statement);
+        mysqli_stmt_close($statement);
+    }
+    elseif (array_key_exists('submit_book_pending', $_POST)) {
+        $sql = 'UPDATE books SET status = "pending" WHERE id = ?';
         $statement = mysqli_prepare($database, $sql);
         mysqli_stmt_bind_param($statement, 'i', $_POST['book_id']);
         mysqli_stmt_execute($statement);
@@ -99,6 +106,11 @@
     $result = mysqli_query($database, $sql);
     $record = mysqli_fetch_assoc($result);
     $count_finished = $record['count'];
+    // 保留数のカウント
+    $sql = 'SELECT COUNT(*) as count FROM books where status = "pending"';
+    $result = mysqli_query($database, $sql);
+    $record = mysqli_fetch_assoc($result);
+    $count_pending = $record['count'];
     
     // 検索以外のボタンが押されたならば
     if(!array_key_exists('submit_search', $_GET)){
@@ -112,6 +124,9 @@
         }
         elseif (array_key_exists('submit_only_finished', $_POST)) {
             $sql = 'SELECT * FROM books WHERE status = "finished" ORDER BY created_at DESC';
+        }
+        elseif (array_key_exists('submit_only_pending', $_POST)) {
+            $sql = 'SELECT * FROM books WHERE status = "pending" ORDER BY created_at DESC';
         }
         else {
             $sql = 'SELECT * FROM books ORDER BY created_at DESC';
@@ -171,6 +186,10 @@
                     <input type="submit" name="submit_only_finished" value="読了"><br>
                     <div class="book_count"><?php print h($count_finished); ?></div>
                 </div>
+                <div class="book_status pending active">
+                    <input type="submit" name="submit_only_pending" value="保留"><br>
+                    <div class="book_count"><?php print h($count_pending); ?></div>
+                </div>
             </form>
         </div>
         <div class="wrapper">
@@ -184,15 +203,27 @@
                             $title = $record['title'];
                             $image_url = $record['image_url'];
                             $status = $record['status'];
+                            $created_at = $record['created_at'];
 ?>
                     <a href="bookshelf_edit.php?id=<?php print h($id); ?>">
-                        <div class="book_item">
+                        <?php if($status === 'unread'){ ?>
+                        <div class="book_item bg_unread">
+                        <?php }else if($status === 'reading'){ ?>
+                        <div class="book_item bg_reading">
+                        <?php }else if($status === 'finished'){ ?>
+                        <div class="book_item bg_finished">
+                        <?php }else if($status === 'pending'){ ?>
+                        <div class="book_item bg_pending">
+                        <?php } ?>
                             <div class="book_image">
                                 <img src="<?php print h($image_url); ?>" alt="">
                             </div>
                             <div class="book_detail">
                                 <div class="book_title">
                                     <?php print h($title); ?>
+                                </div>
+                                <div class="book_title">
+                                    <?php print h($created_at); ?>
                                 </div>
                                 <form action="bookshelf_index.php" method="post">
                                     <input type="hidden" name="book_id" value="<?php print h($id); ?>">
@@ -204,6 +235,9 @@
                                     </div>
                                     <div class="book_status finished <?php if ($status == 'finished') print 'active'; ?>">
                                         <input type="submit" name="submit_book_finished" value="読了">
+                                    </div>
+                                    <div class="book_status pending <?php if ($status == 'pending') print 'active'; ?>">
+                                        <input type="submit" name="submit_book_pending" value="保留">
                                     </div>
                                 </form>
                                 <form action="bookshelf_index.php" method="post">

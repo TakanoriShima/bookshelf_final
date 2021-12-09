@@ -62,6 +62,9 @@ header nav a {
 .finished.active input {
     background-color: #1ca40a;
 }
+.pending.active input {
+    background-color: #ffff008a;
+}
 .unread input:hover {
     background-color: #e00d26;
 }
@@ -70,6 +73,9 @@ header nav a {
 }
 .finished input:hover {
     background-color: #1ca40a;
+}
+.pending input:hover {
+    background-color: #ffff008a;
 }
 .book_count {
     margin-top: 5px;
@@ -137,7 +143,7 @@ img {
     font-weight: bold;
     margin: 0 4px;
     padding: 0;
-    width: 70px;
+    width: 45px;
     height: 30px;
     border-radius: 5px;
 }
@@ -183,4 +189,20 @@ footer {
     color: white;
     cursor: pointer;
     background-color: #1ca40a;
+}
+.bg_unread {
+    background: #e00d2626;
+}
+.bg_reading {
+    background: #219ed236;
+}
+.bg_finished {
+    background: #1ca40a3d;
+}
+.bg_pending {
+    background: #ffff008a;
+}
+
+.book_image img{
+    width: 170px;
 }

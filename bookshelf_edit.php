@@ -37,6 +37,7 @@
     $result = mysqli_stmt_get_result($statement);
     // 注目する書籍情報を連想配列として抜き出す
     $book = mysqli_fetch_assoc($result);
+    // $book = mysqli_fetch_array($result, MYSQLI_ASSOC);
 ?>    
 <!doctype html>
 <html lang="ja">
