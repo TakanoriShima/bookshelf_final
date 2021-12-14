@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.36, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.35, for Linux (x86_64)
 --
 -- Host: localhost    Database: bookshelf
 -- ------------------------------------------------------
--- Server version	5.7.36-0ubuntu0.18.04.1
+-- Server version	5.7.35
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -28,8 +28,9 @@ CREATE TABLE `books` (
   `image_url` varchar(100) DEFAULT NULL,
   `status` varchar(10) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +39,7 @@ CREATE TABLE `books` (
 
 LOCK TABLES `books` WRITE;
 /*!40000 ALTER TABLE `books` DISABLE KEYS */;
-INSERT INTO `books` VALUES (1,'みんなのプログラミング講座','./images/item_book_5.jpg','unread','2021-11-09 09:38:20'),(2,'詳しい解説付き！HTML5','./images/item_book_4.jpg','unread','2021-11-09 09:39:36'),(3,'実践Webアプリケーション開発','./images/item_book_3.jpg','reading','2021-11-09 09:41:05'),(4,'実践で学ぶSEO入門','./images/item_book_2.jpg','reading','2021-11-09 09:41:56'),(5,'初めてのプログラミング','./images/item_book_1.jpg','finished','2021-11-09 09:42:34');
+INSERT INTO `books` VALUES (2,'詳しい解説付き！HTML5','./images/item_book_4.jpg','finished','2021-11-09 09:39:36','pass'),(3,'実践Webアプリケーション開発','./images/item_book_3.jpg','reading','2021-11-09 09:41:05','pass'),(4,'実践で学ぶSEO入門','./images/item_book_2.jpg','reading','2021-11-09 09:41:56','pass'),(5,'初めてのプログラミング','./images/item_book_1.jpg','pending','2021-11-09 09:42:34','pass'),(7,'コミック','./uploads/91UvGWmqdkL.jpg','finished','2021-11-15 04:10:20','pass'),(8,'PHP（下）','./uploads/41vb-rC5lOL._AC_SY200_.jpg','unread','2021-11-15 04:33:00','pass'),(9,'PHP（上）','./uploads/41zPn5lFAgL._AC_SY200_.jpg','pending','2021-11-17 07:22:45','pass'),(10,'実践　PHP+MySQL入門','./uploads/41N2XZC06FL._AC_SY200_.jpg','unread','2021-11-20 05:06:17','pass'),(13,'Numbers 久保','./uploads/100000009003176744_10203_001.jpg','reading','2021-12-09 03:35:42','pass');
 /*!40000 ALTER TABLE `books` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -51,7 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-11-13 10:29:39
-
-	
-ALTER TABLE books ADD password varchar(255);
+-- Dump completed on 2021-12-14 11:13:46
