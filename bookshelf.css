@@ -206,3 +206,13 @@ footer {
 .book_image img{
     width: 170px;
 }
+
+#flash_message p {
+    width: 50%;
+    margin: 0 auto;
+    color: red;
+    border-bottom: double 3px;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}

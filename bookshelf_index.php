@@ -1,14 +1,17 @@
 <?php
-
-    // var_dump($_GET);
+    // 安全対策のための関数
     function h($str) {
         return htmlspecialchars($str, ENT_QUOTES, 'utf-8');
     }
+    
+    // フラッシュメッセージ表示用変数を準備
+    $flash_message = '';
+    
     // MySQLサーバ接続に必要な値を変数に代入
     $host = 'localhost';
     $username = 'dbuser';
     $password = 'dbpass';
-    $db_name = 'bookshelf';
+    $db_name = 'bookshelf_final';
     
     // 変数を設定して、MySQLサーバに接続
     $database = mysqli_connect($host, $username, $password, $db_name);
@@ -22,9 +25,7 @@
     $charset = 'utf8';
     mysqli_set_charset($database, $charset);
     
-    // ここにMySQLを使った何らかの処理を書く
-    
-    //bookshelf_form.phpから送られてくる書籍データの登録
+    // bookshelf_form.phpから送られてくる書籍データの登録
     if (array_key_exists('submit_add_book', $_POST)) {
         // まずは送られてきた画像をuploadsフォルダに移動させる
         $file_name = $_FILES['add_book_image']['name'];
@@ -36,6 +37,8 @@
         mysqli_stmt_bind_param($statement, 'sss', $_POST['add_book_title'], $image_path, $_POST['add_book_password']);
         mysqli_stmt_execute($statement);
         mysqli_stmt_close($statement);
+        // フラッシュメッセージのセット
+        $flash_message = '新規書籍登録が成功しました';
     }
     
     // ステータス変更の処理
@@ -45,6 +48,9 @@
         mysqli_stmt_bind_param($statement, 'i', $_POST['book_id']);
         mysqli_stmt_execute($statement);
         mysqli_stmt_close($statement);
+        
+        // フラッシュメッセージのセット
+        $flash_message = '書籍id: ' . $_POST['book_id'] . 'の書籍情報を未読に変更しました';
     }
     elseif (array_key_exists('submit_book_reading', $_POST)) {
         $sql = 'UPDATE books SET status = "reading" WHERE id = ?';
@@ -52,6 +58,9 @@
         mysqli_stmt_bind_param($statement, 'i', $_POST['book_id']);
         mysqli_stmt_execute($statement);
         mysqli_stmt_close($statement);
+        
+        // フラッシュメッセージのセット
+        $flash_message = '書籍id: ' . $_POST['book_id'] . 'の書籍情報を読中に変更しました';
     }
     elseif (array_key_exists('submit_book_finished', $_POST)) {
         $sql = 'UPDATE books SET status = "finished" WHERE id = ?';
@@ -59,6 +68,9 @@
         mysqli_stmt_bind_param($statement, 'i', $_POST['book_id']);
         mysqli_stmt_execute($statement);
         mysqli_stmt_close($statement);
+        
+        // フラッシュメッセージのセット
+        $flash_message = '書籍id: ' . $_POST['book_id'] . 'の書籍情報を読了に変更しました';
     }
     elseif (array_key_exists('submit_book_pending', $_POST)) {
         $sql = 'UPDATE books SET status = "pending" WHERE id = ?';
@@ -66,29 +78,48 @@
         mysqli_stmt_bind_param($statement, 'i', $_POST['book_id']);
         mysqli_stmt_execute($statement);
         mysqli_stmt_close($statement);
+        
+        // フラッシュメッセージのセット
+        $flash_message = '書籍id: ' . $_POST['book_id'] . 'の書籍情報を保留に変更しました';
     }
     
     // 書籍の削除処理
     if (array_key_exists('submit_book_delete', $_POST)) {
         $sql = 'DELETE FROM books WHERE id = ?';
         $statement = mysqli_prepare($database, $sql);
-        mysqli_stmt_bind_param($statement, 'i', $_POST['book_id_2']);
+        mysqli_stmt_bind_param($statement, 'i', $_POST['book_id']);
         mysqli_stmt_execute($statement);
         mysqli_stmt_close($statement);
+        
+        // フラッシュメッセージのセット
+        $flash_message = '書籍id: ' . $_POST['book_id'] . 'の書籍情報を削除しました';
     }
     
     //bookshelf_edit.phpから送られてくる書籍データの更新
     if (array_key_exists('submit_edit_book', $_POST)) {
-        // まずは送られてきた画像をuploadsフォルダに移動させる
-        $file_name = $_FILES['edit_book_image']['name'];
-        $image_path = './uploads/' . $file_name;
-        move_uploaded_file($_FILES['edit_book_image']['tmp_name'], $image_path);
-        // データベースに書籍を新規登録する
-        $sql = 'UPDATE books SET title=?, image_url=? WHERE id=?';
-        $statement = mysqli_prepare($database, $sql);
-        mysqli_stmt_bind_param($statement, 'ssi', $_POST['edit_book_title'], $image_path, $_POST['book_id']);
+        // 画像ファイルが選択されていれば
+        if($_FILES['edit_book_image']['name'] !== ''){
+            // まずは送られてきた画像をuploadsフォルダに移動させる
+            $file_name = $_FILES['edit_book_image']['name'];
+            $image_path = './uploads/' . $file_name;
+            move_uploaded_file($_FILES['edit_book_image']['tmp_name'], $image_path);
+            // データベースの書籍情報を更新する
+            $sql = 'UPDATE books SET title=?, image_url=? WHERE id=? AND password=?';
+            $statement = mysqli_prepare($database, $sql);
+            mysqli_stmt_bind_param($statement, 'ssis', $_POST['edit_book_title'], $image_path, $_POST['book_id'], $_POST['edit_book_password']);
+        }else{ // 画像ファイルが選択されていなければ
+            // データベースの書籍情報を更新する
+            $sql = 'UPDATE books SET title=? WHERE id=? AND password=?';
+            $statement = mysqli_prepare($database, $sql);
+            mysqli_stmt_bind_param($statement, 'sis', $_POST['edit_book_title'], $_POST['book_id'], $_POST['edit_book_password']);
+        }
+        
+        // 共通処理
         mysqli_stmt_execute($statement);
         mysqli_stmt_close($statement);
+        
+        // フラッシュメッセージのセット
+        $flash_message = '書籍id: ' . $_POST['book_id'] . 'の書籍情報を更新しました';
     }
     
     // 未読数のカウント
@@ -134,7 +165,7 @@
         // いづれかの$sqlを実行して$resultに代入する
         $result = mysqli_query($database, $sql);
     
-    }else{
+    }else{ // 検索ボタンが押されたならば
         // あいまい検索キーワードの組み立て
         $keyword = '%' . $_GET['keyword'] . '%';
         // SQL文の組み立て
@@ -147,8 +178,11 @@
         mysqli_stmt_execute($statement);
         // 結果の取得
         $result = mysqli_stmt_get_result($statement);
-
+        
+        // フラッシュメッセージのセット
+        $flash_message = 'キーワード『' . $_GET['keyword'] . '』で' . $result->num_rows . '件の書籍がヒットしました';
     }
+    
     // MySQLを使った処理が終わると、接続は不要なので切断する
     mysqli_close($database);
 ?>
@@ -166,11 +200,16 @@
                     <a href="./bookshelf_index.php"><img src="./images/logo.png" alt="Bookshelf"></a>
                 </div>
                 <nav style="display: flex">
-                    <form action="./bookshelf_index.php" style="margin-right: 20px;"><input type="search" name="keyword" placeholder="書籍名" style="margin-right: 10px;"><button type="submit" name="submit_search" value="検索">検索</button></form>
+                    <form action="./bookshelf_index.php" style="margin-right: 20px;"><input type="search" name="keyword" placeholder="書籍名" style="margin-right: 10px;" required><button type="submit" name="submit_search" value="検索">検索</button></form>
                     <a href="./bookshelf_form.php"><img src="./images/icon_plus.png" alt="">書籍登録</a>
                 </nav>
             </div>
         </header>
+        <?php if($flash_message !== ''){ ?>
+        <div id="flash_message">
+            <p><?php print h($flash_message); ?></p>
+        </div>
+        <?php } ?>
         <div id="cover">
             <h1 id="cover_title">カンタン！あなたのオンライン本棚</h1>
             <form action="bookshelf_index.php" method="post">
@@ -241,7 +280,7 @@
                                     </div>
                                 </form>
                                 <form action="bookshelf_index.php" method="post">
-                                    <input type="hidden" name="book_id_2" value="<?php print h($id); ?>">
+                                    <input type="hidden" name="book_id" value="<?php print h($id); ?>">
                                     <div class="book_delete">
                                         <input type="submit" name="submit_book_delete" value="削除する"><img src="./images/icon_trash.png" alt="icon trash">
                                     </div>

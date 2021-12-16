@@ -8,7 +8,7 @@
     $host = 'localhost';
     $username = 'dbuser';
     $password = 'dbpass';
-    $db_name = 'bookshelf';
+    $db_name = 'bookshelf_final';
     
     // クエリパラメータで飛んできた書籍番号を取得
     $id = $_GET['id'];
@@ -58,13 +58,16 @@
                 <form action="bookshelf_index.php" method="post" class="form_book" enctype="multipart/form-data">
                     <input type="hidden" name="book_id" value="<?php print h($id); ?>">
                     <div class="book_title">
-                        <input type="text" name="edit_book_title" value="<?php print h($book['title']); ?>" placeholder="書籍タイトルを入力" value="" required>
+                        書籍名: <input type="text" name="edit_book_title" value="<?php print h($book['title']); ?>" placeholder="書籍タイトルを入力" value="" required>
                     </div>
                     <div class="book_image">
-                        <img src="<?php print h($book['image_url']); ?>" alt="">
+                        現在の画像: <img src="<?php print h($book['image_url']); ?>" alt="">
                     </div>
                     <div class="book_image">
-                        <input type="file" name="edit_book_image" required>
+                        画像: <input type="file" name="edit_book_image">
+                    </div>
+                    <div class="book_title">
+                        更新用パスワード: <input type="password" name="edit_book_password" required>
                     </div>
                     <div class="book_submit">
                         <input type="submit" name="submit_edit_book" value="更新">

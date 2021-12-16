@@ -20,13 +20,13 @@
             <div id="main">
                 <form action="bookshelf_index.php" method="post" class="form_book" enctype="multipart/form-data">
                     <div class="book_title">
-                        <input type="text" name="add_book_title" placeholder="書籍タイトルを入力" required>
+                        書籍名: <input type="text" name="add_book_title" placeholder="書籍タイトルを入力" required>
                     </div>
                     <div class="book_image">
-                        <input type="file" name="add_book_image" required>
+                        画像: <input type="file" name="add_book_image" required>
                     </div>
                     <div class="book_title">
-                        <input type="password" name="add_book_password" required>
+                        更新用パスワード: <input type="password" name="add_book_password" required>
                     </div>
                     <div class="book_submit">
                         <input type="submit" name="submit_add_book" value="登録">
