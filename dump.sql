@@ -58,3 +58,15 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2021-12-16 10:07:17
+
+create table users (
+  `id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL UNIQUE,
+  `password` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+UPDATE users SET id=1;
+ALTER TABLE books ADD user_id int NOT NULL;
+UPDATE books SET user_id=1;
+ALTER TABLE books ADD FOREIGN KEY(user_id) REFERENCES users(id);

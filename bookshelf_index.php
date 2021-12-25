@@ -1,4 +1,7 @@
 <?php
+    // 不正アクセス対策
+    require_once 'login_filter.php';
+    
     // 安全対策のための関数
     function h($str) {
         return htmlspecialchars($str, ENT_QUOTES, 'utf-8');
@@ -32,9 +35,9 @@
         $image_path = './uploads/' . $file_name;
         move_uploaded_file($_FILES['add_book_image']['tmp_name'], $image_path);
         // データベースに書籍を新規登録する
-        $sql = 'INSERT INTO books (title, image_url, password, status) VALUES (?, ?, ?, "unread")';
+        $sql = 'INSERT INTO books (user_id, title, image_url, password, status) VALUES (?, ?, ?, ?, "unread")';
         $statement = mysqli_prepare($database, $sql);
-        mysqli_stmt_bind_param($statement, 'sss', $_POST['add_book_title'], $image_path, $_POST['add_book_password']);
+        mysqli_stmt_bind_param($statement, 'isss', $login_user['id'], $_POST['add_book_title'], $image_path, $_POST['add_book_password']);
         mysqli_stmt_execute($statement);
         mysqli_stmt_close($statement);
         // フラッシュメッセージのセット
@@ -134,23 +137,51 @@
     }
     
     // 未読数のカウント
-    $sql = 'SELECT COUNT(*) as count FROM books where status = "unread"';
-    $result = mysqli_query($database, $sql);
+    $sql = 'SELECT COUNT(*) as count FROM books WHERE user_id=? AND status = "unread"';
+    // SQL文実行の準備
+    $statement = mysqli_prepare($database, $sql);
+    // バインド処理
+    mysqli_stmt_bind_param($statement, 'i', $login_user['id']);
+    // 本番実行
+    mysqli_stmt_execute($statement);
+    // 結果の取得
+    $result = mysqli_stmt_get_result($statement);
     $record = mysqli_fetch_assoc($result);
     $count_unread = $record['count'];
     // 読中数のカウント
-    $sql = 'SELECT COUNT(*) as count FROM books where status = "reading"';
-    $result = mysqli_query($database, $sql);
+    $sql = 'SELECT COUNT(*) as count FROM books where user_id=? AND status = "reading"';
+    // SQL文実行の準備
+    $statement = mysqli_prepare($database, $sql);
+    // バインド処理
+    mysqli_stmt_bind_param($statement, 'i', $login_user['id']);
+    // 本番実行
+    mysqli_stmt_execute($statement);
+    // 結果の取得
+    $result = mysqli_stmt_get_result($statement);
     $record = mysqli_fetch_assoc($result);
     $count_reading = $record['count'];
     // 読了数のカウント
-    $sql = 'SELECT COUNT(*) as count FROM books where status = "finished"';
-    $result = mysqli_query($database, $sql);
+    $sql = 'SELECT COUNT(*) as count FROM books where user_id=? AND status = "finished"';
+    // SQL文実行の準備
+    $statement = mysqli_prepare($database, $sql);
+    // バインド処理
+    mysqli_stmt_bind_param($statement, 'i', $login_user['id']);
+    // 本番実行
+    mysqli_stmt_execute($statement);
+    // 結果の取得
+    $result = mysqli_stmt_get_result($statement);
     $record = mysqli_fetch_assoc($result);
     $count_finished = $record['count'];
     // 保留数のカウント
-    $sql = 'SELECT COUNT(*) as count FROM books where status = "pending"';
-    $result = mysqli_query($database, $sql);
+    $sql = 'SELECT COUNT(*) as count FROM books where user_id=? AND status = "pending"';
+    // SQL文実行の準備
+    $statement = mysqli_prepare($database, $sql);
+    // バインド処理
+    mysqli_stmt_bind_param($statement, 'i', $login_user['id']);
+    // 本番実行
+    mysqli_stmt_execute($statement);
+    // 結果の取得
+    $result = mysqli_stmt_get_result($statement);
     $record = mysqli_fetch_assoc($result);
     $count_pending = $record['count'];
     
@@ -159,32 +190,40 @@
         
         // どのボタンを押したか（どのステージで絞り込みをするか）を判断し、SELECT文を変更する
         if (array_key_exists('submit_only_unread', $_POST)) {
-            $sql = 'SELECT * FROM books WHERE status = "unread" ORDER BY created_at DESC';
+            $sql = 'SELECT * FROM books WHERE user_id=? AND status = "unread" ORDER BY created_at DESC';
         }
         elseif (array_key_exists('submit_only_reading', $_POST)) {
-            $sql = 'SELECT * FROM books WHERE status = "reading" ORDER BY created_at DESC';
+            $sql = 'SELECT * FROM books WHERE user_id=? AND status = "reading" ORDER BY created_at DESC';
         }
         elseif (array_key_exists('submit_only_finished', $_POST)) {
-            $sql = 'SELECT * FROM books WHERE status = "finished" ORDER BY created_at DESC';
+            $sql = 'SELECT * FROM books WHERE user_id=? AND status = "finished" ORDER BY created_at DESC';
         }
         elseif (array_key_exists('submit_only_pending', $_POST)) {
-            $sql = 'SELECT * FROM books WHERE status = "pending" ORDER BY created_at DESC';
+            $sql = 'SELECT * FROM books WHERE user_id=? AND status = "pending" ORDER BY created_at DESC';
         }
         else {
-            $sql = 'SELECT * FROM books ORDER BY created_at DESC';
+            $sql = 'SELECT * FROM books WHERE user_id=? ORDER BY created_at DESC';
         }
+        
         // いづれかの$sqlを実行して$resultに代入する
-        $result = mysqli_query($database, $sql);
-    
+        // SQL文実行の準備
+        $statement = mysqli_prepare($database, $sql);
+        // バインド処理
+        mysqli_stmt_bind_param($statement, 'i', $login_user['id']);
+        // 本番実行
+        mysqli_stmt_execute($statement);
+        // 結果の取得
+        $result = mysqli_stmt_get_result($statement);
+
     }else{ // 検索ボタンが押されたならば
         // あいまい検索キーワードの組み立て
         $keyword = '%' . $_GET['keyword'] . '%';
         // SQL文の組み立て
-    	$sql = "SELECT * FROM books WHERE title LIKE ? ORDER BY created_at DESC";
+    	$sql = "SELECT * FROM books WHERE user_id=? AND title LIKE ? ORDER BY created_at DESC";
     	// SQL文実行の準備
         $statement = mysqli_prepare($database, $sql);
         // バインド処理
-        mysqli_stmt_bind_param($statement, 's', $keyword);
+        mysqli_stmt_bind_param($statement, 'is', $login_user['id'], $keyword);
         // 本番実行
         mysqli_stmt_execute($statement);
         // 結果の取得
@@ -210,6 +249,7 @@
                 <div id="logo">
                     <a href="./bookshelf_index.php"><img src="./images/logo.png" alt="Bookshelf"></a>
                 </div>
+                <h2><a class="logout" href="./logout.php">ログアウト</a></h2>
                 <nav style="display: flex">
                     <form action="./bookshelf_index.php" style="margin-right: 20px;"><input type="search" name="keyword" placeholder="書籍名" style="margin-right: 10px;" required><button type="submit" name="submit_search" value="検索">検索</button></form>
                     <a href="./bookshelf_form.php"><img src="./images/icon_plus.png" alt="">書籍登録</a>
@@ -223,6 +263,7 @@
         <?php } ?>
         <div id="cover">
             <h1 id="cover_title">カンタン！あなたのオンライン本棚</h1>
+            <h2><?php print h($login_user['name']); ?>さん、ようこそ！</h2>
             <form action="bookshelf_index.php" method="post">
                 <div class="book_status unread active">
                     <input type="submit" name="submit_only_unread" value="未読"><br>
@@ -255,7 +296,7 @@
                             $status = $record['status'];
                             $created_at = $record['created_at'];
 ?>
-                    <a href="bookshelf_edit.php?id=<?php print h($id); ?>">
+                    
                         <?php if($status === 'unread'){ ?>
                         <div class="book_item bg_unread">
                         <?php }else if($status === 'reading'){ ?>
@@ -265,9 +306,11 @@
                         <?php }else if($status === 'pending'){ ?>
                         <div class="book_item bg_pending">
                         <?php } ?>
+                            <a href="bookshelf_edit.php?id=<?php print h($id); ?>">
                             <div class="book_image">
                                 <img src="<?php print h($image_url); ?>" alt="">
                             </div>
+                            </a>
                             <div class="book_detail">
                                 <div class="book_title">
                                     <?php print h($title); ?>
@@ -298,7 +341,7 @@
                                 </form>
                             </div>
                         </div>
-                    </a>
+                    
 <?php
                 }
                 mysqli_free_result($result);

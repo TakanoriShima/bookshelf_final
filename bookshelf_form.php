@@ -1,3 +1,7 @@
+<?php
+    // 不正アクセス対策
+    require_once 'login_filter.php';
+?>
 <!doctype html>
 <html lang="ja">
     <head>

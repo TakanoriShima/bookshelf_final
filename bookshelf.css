@@ -216,3 +216,17 @@ footer {
     margin-top: 20px;
     margin-bottom: 20px;
 }
+
+.title {
+    color: green;
+    width: 60%;
+    margin: 0 auto;
+    text-align: center;
+    margin-top: 30px;
+    border-bottom: double 4px;
+}
+
+.logout {
+    text-decoration: none;
+    color: green;
+}
