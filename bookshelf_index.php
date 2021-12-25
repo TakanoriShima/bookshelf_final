@@ -116,10 +116,21 @@
         
         // 共通処理
         mysqli_stmt_execute($statement);
-        mysqli_stmt_close($statement);
+
+        // 更新された行数を取得
+        $count = mysqli_stmt_affected_rows($statement);
         
-        // フラッシュメッセージのセット
-        $flash_message = '書籍id: ' . $_POST['book_id'] . 'の書籍情報を更新しました';
+        // 1行でも更新されていれば
+        if($count !== 0){
+            // フラッシュメッセージのセット
+            $flash_message = '書籍id: ' . $_POST['book_id'] . 'の書籍情報を更新しました';
+        }else{
+            // フラッシュメッセージのセット
+            $flash_message = '入力情報が間違っているため書籍情報の更新に失敗しました';
+        }
+        
+        mysqli_stmt_close($statement);
+
     }
     
     // 未読数のカウント
